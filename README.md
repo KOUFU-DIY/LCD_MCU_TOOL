@@ -2,6 +2,9 @@
 单片机图片压缩取模工具
 <img width="1712" height="1126" alt="image" src="https://github.com/user-attachments/assets/c907f6ad-f09b-4d28-bafd-5a45c94c6e59" />
 
+# 版本更新记录
+<img width="1698" height="762" alt="image" src="https://github.com/user-attachments/assets/d24a3795-e878-4560-aff1-613a9f403284" />
+
 # 支持的取模格式
 <img width="368" height="256" alt="image" src="https://github.com/user-attachments/assets/c20a39d2-c156-418f-97ff-e73d91f06e16" />
 
@@ -26,5 +29,6 @@
 <img width="372" height="290" alt="image" src="https://github.com/user-attachments/assets/55c6387e-3830-437e-96bd-e40e22b0fde9" />
 
 <img width="378" height="462" alt="image" src="https://github.com/user-attachments/assets/d01fcc71-e62b-4140-9322-2edd3d054d43" />
+
 
 
