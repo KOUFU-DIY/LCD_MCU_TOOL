@@ -1,3 +1,6 @@
+# 企鹅交流群组
+787475855
+
 # 主界面
 <img width="1606" height="1162" alt="image" src="https://github.com/user-attachments/assets/c966252d-73e4-43c7-95c2-a88661aa8a68" />
 
