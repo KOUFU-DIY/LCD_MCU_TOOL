@@ -1,9 +1,6 @@
 # 企鹅交流群组
 787475855
 
-# 意见反馈/广告招租/功能定制
-绿泡泡 KOUFU-KOUFU
-
 # 主界面
 <img width="1606" height="1162" alt="image" src="https://github.com/user-attachments/assets/c966252d-73e4-43c7-95c2-a88661aa8a68" />
 
@@ -49,6 +46,8 @@
 <img width="498" height="252" alt="image" src="https://github.com/user-attachments/assets/38d39754-e692-4e1a-b905-025416312bda" />
 <img width="1606" height="1162" alt="image" src="https://github.com/user-attachments/assets/f104c864-b2be-45f8-9559-845a28e01424" />
 
+# 意见反馈/广告招租/功能定制
+绿泡泡 KOUFU-KOUFU
 
 
 
