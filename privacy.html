@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隐私政策 (Privacy Policy)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 28px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .header-info {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .header-info p {
+            margin: 5px 0;
+        }
+        h4 {
+            color: #2980b9;
+            font-size: 18px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+        ul {
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        strong {
+            color: #222;
+        }
+        .contact-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .contact-box ul {
+            margin-bottom: 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>隐私政策 (Privacy Policy)</h1>
+    <div class="header-info">
+        <p><strong>软件名称：</strong>[MCU图片取模工具]</p>
+        <p><strong>开发者：</strong>卢志豪</p>
+        <p><strong>生效日期：</strong>2026年3月6日</p>
+    </div>
+
+    <p>本隐私政策旨在说明您在使用由卢志豪（以下简称“开发者”或“我”）开发的本软件时，您的个人数据和隐私信息是如何被处理和保护的。</p>
+
+    <h4>1. 我们收集的信息与数据处理方式</h4>
+    <p>本软件是一款为嵌入式开发者设计的辅助工具。根据您选择的功能模式，本软件对数据的处理方式分为以下两种：</p>
+    <ul>
+        <li><strong>本地处理模式（默认）：</strong> 当您使用基础的图片导入、格式转换（如常规 RGB565 / RGB888）、基础压缩算法及 C 语言数组生成功能时，所有数据处理均完全在您的<strong>本地设备</strong>上完成。本软件绝不会在后台静默收集或上传这些本地工程数据。</li>
+        <li><strong>云端高级算法模式（可选/规划中）：</strong> 为了提供更高的压缩率或更复杂的图像处理效果，本软件未来可能包含或引入“云端高级处理算法”。<strong>仅当您主动在软件内选择并开启该类特定的云端算法时</strong>，本软件才会将您选定的图片数据通过加密通道上传至开发者指定的服务器进行计算。</li>
+        <li><strong>版本与状态检查：</strong> 本软件在运行过程中，会通过网络请求查询是否有新版本更新。此过程仅产生标准的网络通讯请求（含 IP 地址及当前软件版本号），不包含任何可识别您个人身份的信息。</li>
+    </ul>
+
+    <h4>2. 我们如何使用您的信息</h4>
+    <ul>
+        <li><strong>云端图片数据的“处理即销毁”原则：</strong> 如果您使用了云端高级算法，您上传的图片数据<strong>仅用于且严格限制于</strong>执行当次格式转换或压缩任务。开发者承诺：服务器在完成处理并向您回传压缩结果后，会<strong>立即或在极短的缓存周期（如1小时）内永久删除</strong>您的源图片及生成数据。您的图片<strong>绝对不会</strong>被用于长期存储、公开展示、第三方共享或作为任何人工智能模型的训练数据。</li>
+        <li><strong>网络请求日志：</strong> 版本检查产生的匿名网络日志仅用于向您反馈新版本信息，以及保障服务器的基础网络安全。</li>
+    </ul>
+
+    <h4>3. 信息的共享与第三方服务</h4>
+    <p>开发者郑重承诺，<strong>绝不</strong>向任何第三方公司、机构或个人出售、出租、共享您的任何数据。本软件保持纯粹的工具属性，<strong>没有</strong>内置任何第三方的广告 SDK、行为跟踪代码或商业分析插件。</p>
+
+    <h4>4. 数据传输与安全保障</h4>
+    <ul>
+        <li><strong>传输加密：</strong> 涉及版本更新查询及未来的云端算法数据交互时，本软件均采用 HTTPS / TLS 等行业标准加密协议进行传输，以防止数据在传输过程中被窃听或篡改。</li>
+        <li><strong>本地安全：</strong> 您在本地处理产生的所有工程文件及代码的安全性，依托于您本地操作系统的安全机制。请您自行妥善保管开发设备和项目数据。</li>
+    </ul>
+
+    <h4>5. 未成年人保护</h4>
+    <p>本软件是一款针对单片机与嵌入式开发的专业技术工具，其目标受众主要为具备相关专业知识的成年开发者或相关专业的学生。我们不会有意收集未满 14 周岁未成年人的任何信息。</p>
+
+    <h4>6. 政策的修订与通知</h4>
+    <p>随着软件功能的迭代或相关法律法规的要求，开发者可能会适时修订本隐私政策的内容。修改后的隐私政策将通过软件内的相关链接或应用商店详情页予以更新，并自发布之日起生效。</p>
+
+    <h4>7. 联系方式</h4>
+    <p>如果您对本隐私政策有任何疑问、建议，或对软件的数据处理方式有任何关切，请通过以下方式与开发者取得联系：</p>
+    <div class="contact-box">
+        <ul>
+            <li><strong>开发者邮箱：</strong> 2963736779@qq.com</li>
+            <li><strong>项目反馈主页：</strong> <a href="https://github.com/KOUFU-DIY/LCD_MCU_TOOL/issues" target="_blank">https://github.com/KOUFU-DIY/LCD_MCU_TOOL/issues</a></li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>
