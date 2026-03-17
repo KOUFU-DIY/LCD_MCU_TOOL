@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>索引QOI-565取模工具</title>
+    <style>
+        /* 全局禁用文本选中，模拟原生软件体验 */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f5f7; color: #333; margin: 0; padding: 20px; 
+            user-select: none; 
+            -webkit-user-select: none; 
+        }
+        /* 放开输入框和代码区的选中权限 */
+        input, textarea { 
+            user-select: text; 
+            -webkit-user-select: text; 
+        }
+        
+        .container { max-width: 950px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #eef0f4; padding-bottom: 10px; }
+        .control-group { margin-bottom: 15px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 6px;}
+        input[type="file"] { padding: 6px; border: 1px solid #ddd; border-radius: 4px; background: #fff; width: 220px; }
+        input[type="number"] { width: 80px; padding: 7px; border: 1px solid #ddd; border-radius: 4px; }
+        
+        /* 针对被禁用的输入框增加置灰样式 */
+        input[disabled] { background-color: #e9ecef; color: #888; cursor: not-allowed; }
+        
+        label { font-size: 14px; font-weight: 500; color: #555; cursor: default; }
+        button { background-color: #005A9E; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        button:hover { background-color: #004578; }
+        
+        .preview-box { margin-bottom: 20px; padding: 10px; border: 1px dashed #ccc; background: #fafafa; display: flex; justify-content: center; align-items: center; min-height: 120px; border-radius: 6px;}
+        canvas { max-width: 100%; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; color: #444; font-weight: bold; background: #eef0f4; padding: 10px 15px; border-radius: 6px 6px 0 0; border: 1px solid #ddd; border-bottom: none;}
+        .toolbar-buttons { display: flex; gap: 10px; }
+        .btn-action { background-color: #107C41; padding: 6px 12px; font-size: 13px; }
+        .btn-action:hover { background-color: #0b5c30; }
+        .btn-export { background-color: #D83B01; padding: 6px 12px; font-size: 13px; }
+        .btn-export:hover { background-color: #a82e01; }
+        
+        textarea { width: 100%; height: 350px; padding: 12px; border: 1px solid #ddd; border-radius: 0 0 4px 4px; font-family: 'Consolas', monospace; font-size: 13px; resize: vertical; box-sizing: border-box; white-space: pre; background: #f8f9fa; line-height: 1.4; outline: none;}
+        textarea:focus { border-color: #005A9E; }
+        .highlight { color: #d83b01; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>索引QOI-565取模工具</h2>
+    
+    <div class="control-group">
+        <input type="file" id="fileInput" accept="image/*">
+        
+        <label for="intervalInput">索引间隔(锁定行宽):</label>
+        <input type="number" id="intervalInput" placeholder="自动" disabled title="已强制锁定为图片宽度（行间隔）">
+        
+        <label for="bytesPerLineInput">换行排版(字节):</label>
+        <input type="number" id="bytesPerLineInput" value="1024" min="1">
+        
+        <button id="btnGenerate">⚡ 生成数组</button>
+    </div>
+
+    <div class="preview-box">
+        <canvas id="previewCanvas" style="display:none;"></canvas>
+        <span id="placeholderText" style="color:#999; font-size: 14px;">等待加载图片...</span>
+    </div>
+
+    <div class="code-toolbar">
+        <span id="ratioInfo">压缩率: -- / -- = <span class="highlight">--%</span></span>
+        <div class="toolbar-buttons">
+            <button id="btnCopy" class="btn-action">📋 一键复制</button>
+            <button id="btnExport" class="btn-export">💾 导出 .c 文件</button>
+        </div>
+    </div>
+    <textarea id="outputArea" placeholder="生成的 C 语言数组将显示在这里..."></textarea>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const intervalInput = document.getElementById('intervalInput');
+    const bytesPerLineInput = document.getElementById('bytesPerLineInput');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnExport = document.getElementById('btnExport');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const outputArea = document.getElementById('outputArea');
+    const ratioInfo = document.getElementById('ratioInfo');
+    const placeholderText = document.getElementById('placeholderText');
+    const ctx = previewCanvas.getContext('2d', { willReadFrequently: true });
+
+    let imgData = null;
+    let imgWidth = 0;
+    let imgHeight = 0;
+    let cleanFileName = "image"; 
+    let currentArrayName = "";   
+
+    function sanitizeFileName(name) {
+        let baseName = name.split('.').slice(0, -1).join('.');
+        if (!baseName) baseName = name;
+        baseName = baseName.replace(/[\u4e00-\u9fa5]/g, '');
+        baseName = baseName.replace(/[^a-zA-Z0-9]/g, '_');
+        baseName = baseName.replace(/_+/g, '_').replace(/^_|_$/g, '');
+        return baseName || "unnamed";
+    }
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        cleanFileName = sanitizeFileName(file.name);
+
+        const img = new Image();
+        img.onload = function() {
+            imgWidth = img.width;
+            imgHeight = img.height;
+            previewCanvas.width = imgWidth;
+            previewCanvas.height = imgHeight;
+            ctx.drawImage(img, 0, 0);
+            imgData = ctx.getImageData(0, 0, imgWidth, imgHeight);
+            
+            previewCanvas.style.display = 'block';
+            placeholderText.style.display = 'none';
+            
+            // 强制将输入框的值显示为图片宽度，以直观反馈已锁定为行间隔
+            intervalInput.value = imgWidth;
+            
+            outputArea.value = "";
+            ratioInfo.innerHTML = `图片已加载: ${imgWidth} x ${imgHeight}`;
+        };
+        img.src = URL.createObjectURL(file);
+    });
+
+    const toHex = (n) => "0x" + n.toString(16).padStart(2, '0').toUpperCase();
+
+    btnGenerate.addEventListener('click', function() {
+        if (!imgData) {
+            alert("请先选择一张图片！");
+            return;
+        }
+
+        // 核心改动：不再读取输入框的值，直接将间隔锁定为图片宽度（行间隔）
+        let interval = imgWidth; 
+        
+        let bytesPerLine = parseInt(bytesPerLineInput.value);
+        if (isNaN(bytesPerLine) || bytesPerLine <= 0) bytesPerLine = 1024;
+
+        const pixels = imgData.data;
+        const totalPixels = imgWidth * imgHeight;
+        
+        let qoi_bytes = [];
+        let index_offsets = [];
+        
+        let prev_r = 0, prev_g = 0, prev_b = 0;
+        let run = 0;
+
+        for (let i = 0; i < totalPixels; i++) {
+            if (i % interval === 0) {
+                if (run > 0) {
+                    qoi_bytes.push(0xC0 | (run - 1));
+                    run = 0;
+                }
+                index_offsets.push(qoi_bytes.length);
+            }
+
+            let idx = i << 2;
+            let r = pixels[idx] >> 3;     
+            let g = pixels[idx + 1] >> 2; 
+            let b = pixels[idx + 2] >> 3; 
+
+            if (r === prev_r && g === prev_g && b === prev_b) {
+                run++;
+                if (run === 62) {
+                    qoi_bytes.push(0xC0 | (run - 1));
+                    run = 0;
+                }
+            } else {
+                if (run > 0) {
+                    qoi_bytes.push(0xC0 | (run - 1));
+                    run = 0;
+                }
+
+                let dr = (r - prev_r + 32) & 31; if (dr > 15) dr -= 32;
+                let dg = (g - prev_g + 64) & 63; if (dg > 31) dg -= 64;
+                let db = (b - prev_b + 32) & 31; if (db > 15) db -= 32;
+
+                let dr_dg = (dr - dg + 32) & 31; if (dr_dg > 15) dr_dg -= 32;
+                let db_dg = (db - dg + 32) & 31; if (db_dg > 15) db_dg -= 32;
+
+                if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1) {
+                    qoi_bytes.push(0x40 | ((dr + 2) << 4) | ((dg + 2) << 2) | (db + 2));
+                } else if (dg >= -32 && dg <= 31 && dr_dg >= -8 && dr_dg <= 7 && db_dg >= -8 && db_dg <= 7) {
+                    qoi_bytes.push(0x80 | (dg + 32));
+                    qoi_bytes.push(((dr_dg + 8) << 4) | (db_dg + 8));
+                } else {
+                    qoi_bytes.push(0xFE);
+                    qoi_bytes.push((r << 3) | (g >> 3));
+                    qoi_bytes.push(((g & 0x07) << 5) | b);
+                }
+
+                prev_r = r;
+                prev_g = g;
+                prev_b = b;
+            }
+        }
+        
+        if (run > 0) qoi_bytes.push(0xC0 | (run - 1));
+
+        let u16_data = [], u24_data = [], u32_data = [];
+        
+        for (let i = 0; i < index_offsets.length; i++) {
+            let offset = index_offsets[i];
+            if (offset <= 65535 && u24_data.length === 0 && u32_data.length === 0) {
+                u16_data.push((offset >> 8) & 0xFF, offset & 0xFF);
+            } else if (offset <= 16777215 && u32_data.length === 0) {
+                u24_data.push((offset >> 16) & 0xFF, (offset >> 8) & 0xFF, offset & 0xFF);
+            } else {
+                u32_data.push((offset >> 24) & 0xFF, (offset >> 16) & 0xFF, (offset >> 8) & 0xFF, offset & 0xFF);
+            }
+        }
+
+        let header = [
+            0x0D,
+            (imgWidth >> 8) & 0xFF, imgWidth & 0xFF,
+            (imgHeight >> 8) & 0xFF, imgHeight & 0xFF,
+            (interval >> 8) & 0xFF, interval & 0xFF,
+            (u16_data.length >> 8) & 0xFF, u16_data.length & 0xFF,
+            (u24_data.length >> 8) & 0xFF, u24_data.length & 0xFF,
+            (u32_data.length >> 8) & 0xFF, u32_data.length & 0xFF
+        ];
+
+        let final_bytes = header.concat(u16_data, u24_data, u32_data, qoi_bytes);
+
+        currentArrayName = `img_${cleanFileName}_${imgWidth}x${imgHeight}`;
+
+        let outputText = `// Generated by 索引QOI-565取模工具\n`;
+        outputText += `// https://github.com/KOUFU-DIY/LCD_MCU_TOOL\n`;
+        outputText += `// Width: ${imgWidth}, Height: ${imgHeight}, Interval: ${interval} (Locked to Width)\n`;
+        outputText += `// Header: 13 bytes, u16_idx: ${u16_data.length} bytes, u24_idx: ${u24_data.length} bytes, u32_idx: ${u32_data.length} bytes\n`;
+        
+        let originalSize = totalPixels * 2; 
+        let compressedSize = final_bytes.length;
+        let ratio = ((compressedSize / originalSize) * 100).toFixed(2);
+        
+        outputText += `// Compress Ratio: ${compressedSize}/${originalSize} = ${ratio}%\n\n`;
+        outputText += `const unsigned char ${currentArrayName}[] = {\n`;
+        
+        for (let i = 0; i < final_bytes.length; i += bytesPerLine) {
+            let chunk = final_bytes.slice(i, i + bytesPerLine);
+            let hexChunk = chunk.map(toHex).join(', ');
+            outputText += `    ${hexChunk}, \n`;
+        }
+        outputText = outputText.replace(/, \n$/, '\n};\n');
+        
+        outputArea.value = outputText;
+        ratioInfo.innerHTML = `压缩率: ${compressedSize}/${originalSize} = <span class="highlight">${ratio}%</span>`;
+    });
+
+    btnCopy.addEventListener('click', function() {
+        if (!outputArea.value) {
+            alert("请先生成数据！");
+            return;
+        }
+        outputArea.select();
+        outputArea.setSelectionRange(0, 9999999); 
+        try {
+            document.execCommand('copy');
+            const originalText = btnCopy.innerText;
+            btnCopy.innerText = "✔️ 复制成功";
+            setTimeout(() => btnCopy.innerText = originalText, 1500);
+        } catch (err) {
+            alert("复制失败，请手动全选复制！");
+        }
+    });
+
+    btnExport.addEventListener('click', function() {
+        if (!outputArea.value || !currentArrayName) {
+            alert("请先生成数据！");
+            return;
+        }
+        let fileContent = `#include <stdint.h>\n\n` + outputArea.value;
+        
+        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${currentArrayName}.c`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+</script>
+</body>
+</html>
